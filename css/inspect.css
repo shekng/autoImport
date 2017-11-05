@@ -1,0 +1,14 @@
+.i_b {
+    border: 3px red solid;
+}
+
+.overlay {
+    color: #fff;
+    position: absolute;
+    width: 100%;
+    left: 0px;
+    text-align: left;
+    padding: 10px;
+    opacity: 0.5;
+    border: 5px yellow solid;
+}
