@@ -1,10 +1,61 @@
 window.inspector = {
     arrContainer: [],
+    arrFinalContainer: [],
     oContainer: null,
     init: function() {
         
+    },  
+    run: function(){
+        $("body").find("*").contents().each(function() {             
+            var $this = $(this);
+            if (this.nodeType === 3 && this.textContent.trim().length) {
+                $this.parent().css({border: "3px green solid"});
+            }
+            else if (this.nodeType === 1) {
+                if (this.tagName === "IMG") {
+                    $this.css({border: "3px yellow solid"});
+                }
+            }
+        });    
     },
-    run: function() {
+    run3: function() {
+        var me = this;
+        
+        me.winWidth = $(window).width() - 50;
+        
+        var arr = $("div");
+        $.each(arr, function(i, obj){
+            //me.goUptoFullWidth(arr.eq(i));
+            if (arr[i].nodeType === 1) {
+                var $find = me.goUptoFullWidth(arr.eq(i));        
+                $find && $find.css({border: "3px green solid"});
+            }
+        });
+        
+        /*
+        var $find = me.goUptoFullWidth($("#a"));        
+        $find && $find.css({border: "3px green solid"});
+        */
+    },
+    goUptoFullWidth: function($ele) {
+        var me = this;
+        
+        if ($ele[0].tagName === "BODY") {
+            return undefined;
+        }
+        if ($ele.attr("done") === "1") {
+            return undefined;
+        }
+        else if ($ele.outerWidth() >= me.winWidth) {
+            $ele.attr("done", "1");
+            return $ele;
+        }
+        else {
+            $ele.attr("done", "1");
+            return me.goUptoFullWidth($ele.parent());
+        }
+    },
+    run2: function() {
         var me = this;
         
         //me.oContainer = new Container($("body"));
@@ -12,15 +63,25 @@ window.inspector = {
         $.each(arr, function(i, obj) {
             var $find = me.findContainer(arr.eq(i));
             if ($find.outerHeight() > 0 && $find[0].nodeType === 1) {
-                $find.addClass("i_b");
+                //$find.addClass("i_b");
                 me.arrContainer.push({"$topEle": arr.eq(i), "$containerEle": $find, type: "undefined"});    
-            }
-            
+            }            
         });
-        //me.findContainer(me.oContainer.arrChild, me.oContainer.$ele.children());
-        
-        $.each(me.arrContainer, function(i, obj) {
-            me.indentifierContainer(obj);
+
+        var iWinHeight = $(window).outerHeight() + 50;        
+        // break container to smaller if it's taller than window height
+        $.each(me.arrContainer, function(i, obj) {            
+            if (obj.$topEle.outerHeight() > iWinHeight) {
+                me.breakDownContainer(obj.$containerEle.children());                
+            }
+            else {
+                me.arrFinalContainer.push(obj);
+            }
+        });                    
+                
+        $.each(me.arrFinalContainer, function(i, obj) {
+            obj.$topEle.css({border: "3px green solid"});
+            //me.indentifierContainer(obj);
         });
     },
     findContainer: function($ele) { 
@@ -37,6 +98,19 @@ window.inspector = {
         
         
     },
+    breakDownContainer: function(arr) {
+        var me = this, iWinHeight = $(window).outerHeight() + 50;        
+        // break container to smaller if it's taller than window height
+        $.each(arr, function(i, obj) {
+            var $ele = $(obj);
+            if ($ele.outerHeight() > iWinHeight) {
+                me.breakDownContainer($ele.children());
+            }
+            else {
+                me.arrFinalContainer.push({"$topEle": $ele, "$containerEle": $ele, type: "undefined"});    
+            }
+        });
+    },
     indentifierContainer: function(oContainer) {
         for (var func in window.identifier) {
              if (window.identifier[func](oContainer)) {
@@ -45,19 +119,6 @@ window.inspector = {
             
         }
     }
-    /*
-    findContainerv2: function(arr, arrChild) {
-        var me = this;
-        
-        $.each(arrChild, function(i, obj){
-            if (arrChild.eq(i).outerHeight() > 0) {
-                var obj = new Container(arrChild.eq(i))
-                arr.push(obj);   
-                me.findContainer(obj.arrChild, obj.$ele.children());
-            }            
-        });                
-    } 
-    */
 }
 
 window.identifier = {
